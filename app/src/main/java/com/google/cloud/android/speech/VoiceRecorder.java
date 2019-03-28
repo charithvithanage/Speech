@@ -23,10 +23,10 @@ import android.support.annotation.NonNull;
 
 
 /**
- * Continuously records audio and notifies the {@link VoiceRecorder.Callback} when voice (or any
+ * Continuously records audio_record and notifies the {@link VoiceRecorder.Callback} when voice (or any
  * sound) is heard.
  *
- * <p>The recorded audio format is always {@link AudioFormat#ENCODING_PCM_16BIT} and
+ * <p>The recorded audio_record format is always {@link AudioFormat#ENCODING_PCM_16BIT} and
  * {@link AudioFormat#CHANNEL_IN_MONO}. This class will automatically pick the right sample rate
  * for the device. Use {@link #getSampleRate()} to get the selected value.</p>
  */
@@ -52,7 +52,7 @@ public class VoiceRecorder {
         /**
          * Called when the recorder is hearing voice.
          *
-         * @param data The audio data in {@link AudioFormat#ENCODING_PCM_16BIT}.
+         * @param data The audio_record data in {@link AudioFormat#ENCODING_PCM_16BIT}.
          * @param size The size of the actual data in {@code data}.
          */
         public void onVoice(byte[] data, int size) {
@@ -86,7 +86,7 @@ public class VoiceRecorder {
     }
 
     /**
-     * Starts recording audio.
+     * Starts recording audio_record.
      *
      * <p>The caller is responsible for calling {@link #stop()} later.</p>
      */
@@ -100,13 +100,13 @@ public class VoiceRecorder {
         }
         // Start recording.
         mAudioRecord.startRecording();
-        // Start processing the captured audio.
+        // Start processing the captured audio_record.
         mThread = new Thread(new ProcessVoice());
         mThread.start();
     }
 
     /**
-     * Stops recording audio.
+     * Stops recording audio_record.
      */
     public void stop() {
         synchronized (mLock) {
@@ -135,9 +135,9 @@ public class VoiceRecorder {
     }
 
     /**
-     * Retrieves the sample rate currently used to record audio.
+     * Retrieves the sample rate currently used to record audio_record.
      *
-     * @return The sample rate of recorded audio.
+     * @return The sample rate of recorded audio_record.
      */
     public int getSampleRate() {
         if (mAudioRecord != null) {
@@ -171,7 +171,7 @@ public class VoiceRecorder {
     }
 
     /**
-     * Continuously processes the captured audio and notifies {@link #mCallback} of corresponding
+     * Continuously processes the captured audio_record and notifies {@link #mCallback} of corresponding
      * events.
      */
     private class ProcessVoice implements Runnable {

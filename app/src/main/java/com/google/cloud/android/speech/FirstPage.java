@@ -131,6 +131,8 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_first);
 
+        createJson();
+
         imageView = (ImageView) findViewById(R.id.ivAnimation);
         Glide.with(this).load(R.raw.welcome_gif).into(imageView);
         btnEnglish = findViewById(R.id.btnEnglish);
@@ -162,6 +164,10 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
             }
         });
 
+    }
+
+    private void createJson() {
+        sinhalaQuestion.setAnswer("");
     }
 
     public void onPause() {

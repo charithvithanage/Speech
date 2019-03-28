@@ -65,4 +65,38 @@ public class ApiService {
 
     }
 
+    public void checkSinhalaQuestion(Context context, final SinhalaQuestion sinhalaQuestion, final VolleyCallback callback) {
+
+
+        RequestQueue queue = Volley.newRequestQueue(context);
+
+
+        final String stringUser = gson.toJson(sinhalaQuestion);
+        Log.d(TAG,stringUser);
+        Log.d(TAG,Config.checkSinhalaQuestion);
+
+        JSONObject object = null;
+
+        try {
+            object = new JSONObject(stringUser);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        JsonObjectRequest jsonobj =new JsonObjectRequest(Request.Method.POST, Config.checkSinhalaQuestion, object, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                callback.onSuccessResponse(response.toString());
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG, error.toString());
+            }
+        });
+
+        queue.add(jsonobj);
+
+    }
+
 }
