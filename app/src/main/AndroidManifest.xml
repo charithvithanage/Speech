@@ -29,8 +29,9 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.Speech"
-        tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".FirstPage">
+        tools:ignore="GoogleAppIndexingWarning"
+        android:largeHeap="true">
+        <activity android:name=".TestActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -38,7 +39,7 @@
             </intent-filter>
         </activity>
         <!--<activity android:name=".MainActivity" />-->
-        <activity android:name=".TestActivity" />
+        <!--<activity android:name=".TestActivity" />-->
 
         <service android:name=".SpeechService" />
 

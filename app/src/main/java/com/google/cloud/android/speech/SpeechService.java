@@ -80,7 +80,7 @@ public class SpeechService extends Service {
          * Called when a new piece of text was recognized by the Speech API.
          *
          * @param text    The text.
-         * @param isFinal {@code true} when the API finished processing audio.
+         * @param isFinal {@code true} when the API finished processing audio_record.
          */
         void onSpeechRecognized(String text, boolean isFinal);
 
@@ -242,9 +242,9 @@ public class SpeechService extends Service {
     }
 
     /**
-     * Starts recognizing speech audio.
+     * Starts recognizing speech audio_record.
      *
-     * @param sampleRate The sample rate of the audio.
+     * @param sampleRate The sample rate of the audio_record.
      */
     public void startRecognizing(int sampleRate) {
         if (mApi == null) {
@@ -267,10 +267,10 @@ public class SpeechService extends Service {
     }
 
     /**
-     * Recognizes the speech audio. This method should be called every time a chunk of byte buffer
+     * Recognizes the speech audio_record. This method should be called every time a chunk of byte buffer
      * is ready.
      *
-     * @param data The audio data.
+     * @param data The audio_record data.
      * @param size The number of elements that are actually relevant in the {@code data}.
      */
     public void recognize(byte[] data, int size) {
@@ -284,7 +284,7 @@ public class SpeechService extends Service {
     }
 
     /**
-     * Finishes recognizing speech audio.
+     * Finishes recognizing speech audio_record.
      */
     public void finishRecognizing() {
         if (mRequestObserver == null) {
@@ -297,7 +297,7 @@ public class SpeechService extends Service {
     /**
      * Recognize all data from the specified {@link InputStream}.
      *
-     * @param stream The audio data.
+     * @param stream The audio_record data.
      */
     public void recognizeInputStream(InputStream stream) {
         try {

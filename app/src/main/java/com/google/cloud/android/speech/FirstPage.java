@@ -40,7 +40,6 @@ import java.util.Set;
 
 public class FirstPage extends AppCompatActivity implements MessageDialogFragment.Listener {
 
-    private static final int MY_DATA_CHECK_CODE = 200;
     private Button btnEnglish, btnSinhala, btnTamil;
     TextToSpeech ts;
 
@@ -253,11 +252,12 @@ dialog = new android.app.ProgressDialog(FirstPage.this);
         public void onVoiceStart() {
                     Log.d(TAG,"mVoice callback onVoiceStart()");
 
-            showStatus(true);
-            if (mSpeechService != null) {
-                mSpeechService.startRecognizing(mVoiceRecorder.getSampleRate());
-            }
-        }
+        createJson();
+
+        imageView = (ImageView) findViewById(R.id.ivAnimation);
+        Glide.with(this).load(R.raw.welcome_gif).into(imageView);
+        btnEnglish = findViewById(R.id.btnEnglish);
+        btnSinhala = findViewById(R.id.btnSinhala);
 
         @Override
         public void onVoice(byte[] data, int size) {
@@ -278,6 +278,17 @@ dialog = new android.app.ProgressDialog(FirstPage.this);
 
     };
 
+    private void createJson() {
+        sinhalaQuestion.setAnswer("");
+    }
+
+    public void onPause() {
+        if (ts != null) {
+            ts.stop();
+            ts.shutdown();
+        }
+        super.onPause();
+    }
 
     private void selectSinhala() {
         Config.Instance.setLanguageCode("si-LK");

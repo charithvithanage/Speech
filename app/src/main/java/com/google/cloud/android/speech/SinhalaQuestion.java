@@ -13,6 +13,16 @@ public class SinhalaQuestion {
 
     private List<String> keywords;
 
+    private String audioString;
+
+    public String getAudioString() {
+        return audioString;
+    }
+
+    public void setAudioString(String audioString) {
+        this.audioString = audioString;
+    }
+
     public Long getId() {
         return id;
     }
