@@ -40,7 +40,6 @@ import java.util.Set;
 
 public class FirstPage extends AppCompatActivity implements MessageDialogFragment.Listener {
 
-    private static final int MY_DATA_CHECK_CODE = 200;
     private Button btnEnglish, btnSinhala;
     TextToSpeech ts;
 
