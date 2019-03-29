@@ -1,43 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <!--<LinearLayout-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="match_parent"-->
-    <!--android:layout_weight="1"-->
-    <!--android:gravity="center"-->
-    <!--android:orientation="vertical"-->
-    <!--android:padding="@dimen/spacing_medium">-->
-
-    <!--<TextView-->
-    <!--android:id="@+id/textView2"-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:text="Please select your language" />-->
-
-    <!--<TextView-->
-    <!--android:id="@+id/textView"-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:text="කරුණාකර ඔබගේ භාෂාව තෝරන්න" />-->
-    <!--</LinearLayout>-->
-
-    <!--<LinearLayout-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="match_parent"-->
-    <!--android:layout_weight="2"-->
-    <!--android:orientation="vertical">-->
-
 
     <ImageView
         android:id="@+id/ivLogo"
         android:layout_width="202dp"
         android:layout_height="81dp"
+        android:layout_gravity="right"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
@@ -50,35 +24,46 @@
         app:layout_constraintVertical_bias="0.069"
         app:srcCompat="@mipmap/sampath_e_logo" />
 
-    <TextView
+    <LinearLayout
         android:id="@+id/status"
         android:layout_width="match_parent"
-        android:layout_height="19dp"
-        android:layout_marginBottom="8dp"
+        android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:text="@string/listening"
-        android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-        android:textColor="@color/status_not_hearing"
+        android:orientation="vertical"
         app:layout_constraintBottom_toTopOf="@+id/ivAnimation"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ivLogo"
-        app:layout_constraintVertical_bias="0.149" />
+        app:layout_constraintTop_toBottomOf="@+id/ivLogo">
+
+        <TextView
+            android:id="@+id/tvWait"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="Wait....."
+            android:textColor="@color/status_not_hearing"
+            android:textSize="18sp" />
+
+        <!--<ImageView-->
+        <!--android:id="@+id/hearingImageView"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content" />-->
+    </LinearLayout>
 
     <ImageView
         android:id="@+id/ivAnimation"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="266dp"
+        android:layout_height="142dp"
+        android:layout_gravity="center_horizontal"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.372"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/status"
         app:layout_constraintVertical_bias="0.266" />
@@ -113,5 +98,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="English" />
+
+
+        <Button
+            android:id="@+id/btnTamil"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="தமிழ்" />
     </LinearLayout>
-</android.support.constraint.ConstraintLayout>
+</LinearLayout>
