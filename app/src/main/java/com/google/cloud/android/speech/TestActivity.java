@@ -42,7 +42,7 @@ public class TestActivity extends AppCompatActivity {
 
     private static final String TAG = "GoogleVoiceToText";
     MediaPlayer mediaPlayer = new MediaPlayer();
-    SinhalaQuestion sinhalaQuestion = new SinhalaQuestion();
+    GetQuestion sinhalaQuestion = new GetQuestion();
     TextToSpeech ts;
 
     @Override
@@ -62,8 +62,6 @@ public class TestActivity extends AppCompatActivity {
                 }
             }
         });
-
-        new CheckQuestionAsync().execute();
 
 //        byte[] decoded = Base64.decode(getTermsString(), 0);
 
@@ -142,84 +140,6 @@ public class TestActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         return null;
-    }
-
-    private class CheckQuestionAsync extends AsyncTask<Void, Void, Void> {
-
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            ApiService policyService = ApiService.getInstance();
-            final Gson gson = new Gson();
-
-            final List<SampleObject> listOfSampleObject = new ArrayList<>();
-
-            policyService.checkSinhalaQuestion(TestActivity.this, sinhalaQuestion, new VolleyCallback() {
-                @Override
-                public void onSuccessResponse(String result) {
-                    JSONObject jsonObject;
-                    String status;
-                    try {
-                        jsonObject = new JSONObject(result);
-
-
-                        Object json = new JSONTokener(jsonObject.getString("object")).nextValue();
-
-                        if (json instanceof JSONObject) {
-
-                            String str = jsonObject.getString("object");
-                            SampleObject sampleObject = new SampleObject();
-
-                            sampleObject.setSinhalaQuestion(str);
-                            sampleObject.setCount(1);
-
-                            listOfSampleObject.add(sampleObject);
-                        } else if (json instanceof JSONArray) {
-
-                            JSONArray jsonArray = jsonObject.getJSONArray("object");
-                            for (int i = 0; i < jsonArray.length(); i++) {
-                                JSONObject jsonObject1 = jsonArray.getJSONObject(i);
-                                SampleObject sampleObject = new SampleObject();
-
-                                sampleObject.setSinhalaQuestion(jsonObject1.getString("sinhalaQuestion"));
-                                sampleObject.setCount(jsonObject1.getInt("count"));
-
-
-                                listOfSampleObject.add(sampleObject);
-                            }
-
-                        }
-
-                        if (listOfSampleObject.size() == 1) {
-                            SinhalaQuestion sinhalaQuestion = gson.fromJson(Utils.sortCardList(listOfSampleObject).get(0).getSinhalaQuestion(), SinhalaQuestion.class);
-//                            byte[] decoded = Base64.decode(sinhalaQuestion.getAudioString(), 0);
-//                            playMp3(decoded);
-                            ts.speak(sinhalaQuestion.getAnswer(), TextToSpeech.QUEUE_FLUSH, null);
-
-                        } else if (listOfSampleObject.size() == 0) {
-                            ts.speak("කරුණාකර පාරිභෝගික නියෝජිතයා අමතන්න", TextToSpeech.QUEUE_FLUSH, null);
-                        } else {
-                            ts.speak("ඔබ අදහස් කලේ", TextToSpeech.QUEUE_FLUSH, null);
-
-                        }
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-
-                    }
-                }
-
-                @Override
-                public void onError(String error) {
-                    Toast.makeText(getApplicationContext(), error, Toast.LENGTH_SHORT).show();
-
-                }
-            });
-
-
-            return null;
-        }
-
     }
 
     public void onPause() {

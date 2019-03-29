@@ -42,7 +42,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
-            android:text="Wait....."
+            android:text="Please Wait....."
             android:textColor="@color/status_not_hearing"
             android:textSize="18sp" />
 
@@ -61,7 +61,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintBottom_toTopOf="@+id/btnLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.372"
         app:layout_constraintStart_toStartOf="parent"
@@ -69,7 +69,7 @@
         app:layout_constraintVertical_bias="0.266" />
 
     <LinearLayout
-        android:id="@+id/linearLayout"
+        android:id="@+id/btnLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
@@ -91,19 +91,35 @@
             android:id="@+id/btnSinhala"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="සිංහල" />
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/button_bg"
+            android:text="සිංහල"
+            android:textColor="@color/primary" />
 
         <Button
             android:id="@+id/btnEnglish"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="English" />
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/button_bg"
+
+            android:text="English"
+            android:textColor="@color/primary" />
 
 
         <Button
             android:id="@+id/btnTamil"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/button_bg"
+            android:textColor="@color/primary"
+
             android:text="தமிழ்" />
     </LinearLayout>
+
+    <ListView
+        android:id="@+id/questionList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1" />
 </LinearLayout>

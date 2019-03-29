@@ -1,8 +1,7 @@
 package com.google.cloud.android.speech;
 
-public class SampleObject {
+public class GetQuestion {
     String question;
-    Integer count;
 
     public String getQuestion() {
         return question;
@@ -10,13 +9,5 @@ public class SampleObject {
 
     public void setQuestion(String question) {
         this.question = question;
-    }
-
-    public Integer getCount() {
-        return count;
-    }
-
-    public void setCount(Integer count) {
-        this.count = count;
     }
 }

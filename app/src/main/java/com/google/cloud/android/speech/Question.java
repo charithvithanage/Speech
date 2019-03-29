@@ -1,10 +1,8 @@
 package com.google.cloud.android.speech;
 
-import android.util.Log;
-
 import java.util.List;
 
-public class SinhalaQuestion {
+public class Question {
     private Long id;
 
     private String question;

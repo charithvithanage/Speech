@@ -31,7 +31,7 @@ public class ApiService {
         return apiService;
     }
 
-    public void addSinhalaQuestion(Context context, final SinhalaQuestion sinhalaQuestion, final VolleyCallback callback) {
+    public void addSinhalaQuestion(Context context, final Question sinhalaQuestion, final VolleyCallback callback) {
 
 
         RequestQueue queue = Volley.newRequestQueue(context);
@@ -65,7 +65,7 @@ public class ApiService {
 
     }
 
-    public void checkSinhalaQuestion(Context context, final SinhalaQuestion sinhalaQuestion, final VolleyCallback callback) {
+    public void checkSinhalaQuestion(Context context, final GetQuestion sinhalaQuestion, final VolleyCallback callback) {
 
 
         RequestQueue queue = Volley.newRequestQueue(context);
@@ -98,5 +98,75 @@ public class ApiService {
         queue.add(jsonobj);
 
     }
+
+    public void checkTamilQuestion(Context context, final GetQuestion tamilQuestion, final VolleyCallback callback) {
+
+
+        RequestQueue queue = Volley.newRequestQueue(context);
+
+
+        final String stringUser = gson.toJson(tamilQuestion);
+        Log.d(TAG,stringUser);
+        Log.d(TAG,Config.checkTamilQuestion);
+
+        JSONObject object = null;
+
+        try {
+            object = new JSONObject(stringUser);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        JsonObjectRequest jsonobj =new JsonObjectRequest(Request.Method.POST, Config.checkTamilQuestion, object, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                callback.onSuccessResponse(response.toString());
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG, error.toString());
+            }
+        });
+
+        queue.add(jsonobj);
+
+    }
+
+
+    public void checkEnglishaQuestion(Context context, final GetQuestion englishQuestion, final VolleyCallback callback) {
+
+
+        RequestQueue queue = Volley.newRequestQueue(context);
+
+
+        final String stringUser = gson.toJson(englishQuestion);
+        Log.d(TAG,stringUser);
+        Log.d(TAG,Config.checkEnglishQuestion);
+
+        JSONObject object = null;
+
+        try {
+            object = new JSONObject(stringUser);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        JsonObjectRequest jsonobj =new JsonObjectRequest(Request.Method.POST, Config.checkEnglishQuestion, object, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                callback.onSuccessResponse(response.toString());
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG, error.toString());
+            }
+        });
+
+        queue.add(jsonobj);
+
+    }
+
 
 }
