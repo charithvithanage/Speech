@@ -292,22 +292,15 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
 
         Config.Instance.setLanguageCode("si-LK");
 
-        Set<String> a = new HashSet<>();
-        a.add("male");
-        Voice voice = new Voice("en-us-x-sfg#male_2-local", new Locale("si", "LK"), 400, 200, true, a);
-        ts.setVoice(voice);
-        ts.speak("සින්හල තෝරාගත්තා. ප්රශ්න සින්හලෙන් අහන්න", TextToSpeech.QUEUE_FLUSH, null);
+//        Set<String> a = new HashSet<>();
+//        a.add("male");
+//        Voice voice = new Voice("en-us-x-sfg#male_2-local", new Locale("si", "LK"), 400, 200, true, a);
+//        ts.setVoice(voice);
+//        ts.speak("සින්හල තෝරාගත්තා. ප්රශ්න සින්හලෙන් අහන්න", TextToSpeech.QUEUE_FLUSH, null);
+
+        playMp3ByRawFile(R.raw.select_language_sinhala);
 
         btnLayout.setVisibility(View.GONE);
-        Handler handler = new Handler();
-
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-//                                            tvWait.setText("Say something.....");
-                startVoiceRecorder();
-            }
-        }, 5000);
 
     }
 
@@ -454,7 +447,6 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
                                                 }
                                             }, 3);
                                         }
-
 
 
                                     } else {
@@ -884,5 +876,24 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
         }
     }
 
+    private void playMp3ByRawFile(int resorceId) {
+        try {
+            // create temp file that will hold byte array
+            mediaPlayer.reset();
+
+            mediaPlayer = MediaPlayer.create(getApplicationContext(), resorceId);//Create MediaPlayer object with MP3 file under res/raw folder
+            mediaPlayer.start();//
+
+            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    startVoiceRecorder();
+                }
+            });
+        } catch (Exception ex) {
+            String s = ex.toString();
+            ex.printStackTrace();
+        }
+    }
 
 }
