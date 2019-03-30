@@ -10,8 +10,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.speech.tts.TextToSpeech;
-import android.speech.tts.Voice;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -41,16 +39,13 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
-import java.util.Set;
 
 public class FirstPage extends AppCompatActivity implements MessageDialogFragment.Listener {
 
     private static final int MY_DATA_CHECK_CODE = 200;
     private Button btnEnglish, btnSinhala, btnTamil;
-    TextToSpeech ts;
+
 
     private static final String FRAGMENT_MESSAGE_DIALOG = "message_dialog";
 
@@ -91,28 +86,13 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
         init();
 
 
-        btnEnglish.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                selectEnglish();
-            }
-        });
+        btnEnglish.setOnClickListener(view -> selectEnglish());
 
 
-        btnSinhala.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                selectSinhala();
-            }
-        });
+        btnSinhala.setOnClickListener(view -> selectSinhala());
 
 
-        btnTamil.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                selectTamil();
-            }
-        });
+        btnTamil.setOnClickListener(view -> selectTamil());
     }
 
     @Override
@@ -134,14 +114,6 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO},
                     REQUEST_RECORD_AUDIO_PERMISSION);
         }
-    }
-
-    public void onPause() {
-        if (ts != null) {
-            ts.stop();
-            ts.shutdown();
-        }
-        super.onPause();
     }
 
 
@@ -228,21 +200,7 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
 
             mSpeechService = SpeechService.from(binder);
             mSpeechService.addListener(mSpeechServiceListener);
-//            mStatus.setVisibility(View.VISIBLE);
-            ts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
-                @Override
-                public void onInit(int status) {
-                    if (status != TextToSpeech.ERROR) {
-                        Set<String> a = new HashSet<>();
-                        a.add("male");
-                        Voice voice = new Voice("en-us-x-sfg#male_2-local", new Locale("en", "US"), 400, 200, true, a);
-                        ts.setVoice(voice);
-//                        ts.setLanguage(Locale.forLanguageTag("en-US"));
 
-//                        startVoiceRecorder();
-                    }
-                }
-            });
         }
 
 
@@ -291,36 +249,16 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
         status = "questionStatus";
 
         Config.Instance.setLanguageCode("si-LK");
-
-//        Set<String> a = new HashSet<>();
-//        a.add("male");
-//        Voice voice = new Voice("en-us-x-sfg#male_2-local", new Locale("si", "LK"), 400, 200, true, a);
-//        ts.setVoice(voice);
-//        ts.speak("සින්හල තෝරාගත්තා. ප්රශ්න සින්හලෙන් අහන්න", TextToSpeech.QUEUE_FLUSH, null);
-
         playMp3ByRawFile(R.raw.select_language_sinhala);
-
         btnLayout.setVisibility(View.GONE);
-
     }
 
     private void selectEnglish() {
         status = "questionStatus";
 
         Config.Instance.setLanguageCode("en-US");
-        ts.speak("English selected. please ask your questions in english", TextToSpeech.QUEUE_FLUSH, null);
-
+        playMp3ByRawFile(R.raw.select_language_sinhala);
         btnLayout.setVisibility(View.GONE);
-
-        Handler handler = new Handler();
-
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-//                                            tvWait.setText("Say something.....");
-                startVoiceRecorder();
-            }
-        }, 5000);
 
     }
 
@@ -328,24 +266,8 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
         status = "questionStatus";
 
         Config.Instance.setLanguageCode("ta-LK");
-        Set<String> a = new HashSet<>();
-        a.add("male");
-        Voice voice = new Voice("en-us-x-sfg#male_2-local", new Locale("ta", "LK"), 400, 200, true, a);
-        ts.setVoice(voice);
-
-        ts.speak("தமிழ் தெரிவு செய்துள்ளீர்கள். உங்கள் கேள்விகளை தமிழ் மொழியில் கேளுங்கள்", TextToSpeech.QUEUE_FLUSH, null);
+        playMp3ByRawFile(R.raw.select_language_sinhala);
         btnLayout.setVisibility(View.GONE);
-
-        Handler handler = new Handler();
-
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-//                                            tvWait.setText("Say something.....");
-                startVoiceRecorder();
-            }
-        }, 6000);
-
     }
 
 
@@ -392,41 +314,32 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
                 @Override
                 public void onSpeechRecognized(final String text, final boolean isFinal) {
 
+
+                    if (isFinal) {
+                        stopVoiceRecorder();
+                    }
+
                     if (!TextUtils.isEmpty(text)) {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 if (isFinal) {
 
-                                    stopVoiceRecorder();
-
                                     Log.d(TAG, text);
-
 
                                     if (status.equals("startStatus")) {
                                         if (text.toLowerCase().equals("hello sam")) {
                                             imageView.setVisibility(View.VISIBLE);
                                             status = "selectLanguageStatus";
-                                            ts.speak("Hello I'm Sam, Please select your language", TextToSpeech.QUEUE_FLUSH, null);
+                                            playMp3ByRawFile(R.raw.select_language_sinhala);
+//                                            ts.speak("Hello I'm Sam, Please select your language", TextToSpeech.QUEUE_FLUSH, null);
                                             btnLayout.setVisibility(View.VISIBLE);
                                             imageView.setVisibility(View.VISIBLE);
-
                                         } else {
-
-
-                                            ts.speak("Say hello sam", TextToSpeech.QUEUE_FLUSH, null);
-
+                                            playMp3ByRawFile(R.raw.select_language_sinhala);
+//                                            ts.speak("Say hello sam", TextToSpeech.QUEUE_FLUSH, null);
                                         }
 
-                                        Handler handler = new Handler();
-
-                                        handler.postDelayed(new Runnable() {
-                                            @Override
-                                            public void run() {
-//                                            tvWait.setText("Say something.....");
-                                                startVoiceRecorder();
-                                            }
-                                        }, 3000);
                                     } else if (status.equals("selectLanguageStatus")) {
 
                                         if (firstTwo(text.toLowerCase()).equals("en")) {
@@ -436,29 +349,16 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
                                         } else if (firstTwo(text.toLowerCase()).equals("si")) {
                                             selectSinhala();
                                         } else {
-                                            ts.speak("Say it again", TextToSpeech.QUEUE_FLUSH, null);
-                                            Handler handler = new Handler();
-
-                                            handler.postDelayed(new Runnable() {
-                                                @Override
-                                                public void run() {
-//                                            tvWait.setText("Say something.....");
-                                                    startVoiceRecorder();
-                                                }
-                                            }, 3);
+                                            playMp3ByRawFile(R.raw.select_language_sinhala);
+//                                            ts.speak("Say it again", TextToSpeech.QUEUE_FLUSH, null);
                                         }
 
 
                                     } else {
 
                                         getQuestion.setQuestion(text);
-                                        if (Config.Instance.getLanguageCode().equals("si-LK")) {
-                                            new CheckSinhalaQuestionAsync().execute();
-                                        } else if (Config.Instance.getLanguageCode().equals("ta-LK")) {
-                                            new CheckTamilQuestionAsync().execute();
-                                        } else {
-                                            new CheckEnglishQuestionAsync().execute();
-                                        }
+                                        new CheckSinhalaQuestionAsync().execute();
+
                                     }
                                 }
                             }
@@ -546,7 +446,14 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
                                 JSONObject jsonObject1 = jsonArray.getJSONObject(i);
                                 SampleObject sampleObject = new SampleObject();
 
-                                sampleObject.setQuestion(jsonObject1.getString("sinhalaQuestion"));
+                                if (Config.Instance.getLanguageCode().equals("si-LK")) {
+                                    sampleObject.setQuestion(jsonObject1.getString("sinhalaQuestion"));
+                                } else if (Config.Instance.getLanguageCode().equals("ta-LK")) {
+                                    sampleObject.setQuestion(jsonObject1.getString("tamilQuestion"));
+                                } else {
+                                    sampleObject.setQuestion(jsonObject1.getString("englishQuestion"));
+                                }
+
                                 sampleObject.setCount(jsonObject1.getInt("count"));
 
 
@@ -560,17 +467,15 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
                             byte[] decoded = Base64.decode(sinhalaQuestion.getAudioString(), 0);
                             playMp3(decoded);
                         } else if (listOfSampleObject.size() == 0) {
-                            ts.speak("කරුණාකර පාරිභෝගික නියෝජිතයා අමතන්න", TextToSpeech.QUEUE_FLUSH, null);
-                            Handler handler = new Handler();
-                            handler.postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    startVoiceRecorder();
-                                }
-                            }, 3000);
+                            playMp3ByRawFile(R.raw.select_language_sinhala);
+
+//                            ts.speak("කරුණාකර පාරිභෝගික නියෝජිතයා අමතන්න", TextToSpeech.QUEUE_FLUSH, null);
+
                         } else {
 
-                            ts.speak("ඔබ අදහස් කලේ", TextToSpeech.QUEUE_FLUSH, null);
+                            playMp3ByRawFile(R.raw.select_language_sinhala);
+
+//                            ts.speak("ඔබ අදහස් කලේ", TextToSpeech.QUEUE_FLUSH, null);
 
                             listView.setVisibility(View.VISIBLE);
 
@@ -615,229 +520,9 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            Handler handler = new Handler();
-
-
-            if (selectExactQuestion) {
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        startVoiceRecorder();
-                    }
-                }, 3000);
-            }
+            startVoiceRecorder();
         }
     }
-
-    private class CheckTamilQuestionAsync extends AsyncTask<Void, Void, Void> {
-
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            ApiService policyService = ApiService.getInstance();
-            final Gson gson = new Gson();
-
-            final List<SampleObject> listOfSampleObject = new ArrayList<>();
-
-            policyService.checkTamilQuestion(FirstPage.this, getQuestion, new VolleyCallback() {
-                @Override
-                public void onSuccessResponse(String result) {
-                    JSONObject jsonObject;
-                    String status;
-                    try {
-                        jsonObject = new JSONObject(result);
-
-
-                        Object json = new JSONTokener(jsonObject.getString("object")).nextValue();
-
-                        if (json instanceof JSONObject) {
-
-                            String str = jsonObject.getString("object");
-                            SampleObject sampleObject = new SampleObject();
-
-                            sampleObject.setQuestion(str);
-                            sampleObject.setCount(1);
-
-                            listOfSampleObject.add(sampleObject);
-                        } else if (json instanceof JSONArray) {
-
-                            JSONArray jsonArray = jsonObject.getJSONArray("object");
-                            for (int i = 0; i < jsonArray.length(); i++) {
-                                JSONObject jsonObject1 = jsonArray.getJSONObject(i);
-                                SampleObject sampleObject = new SampleObject();
-
-                                sampleObject.setQuestion(jsonObject1.getString("tamilQuestion"));
-                                sampleObject.setCount(jsonObject1.getInt("count"));
-
-
-                                listOfSampleObject.add(sampleObject);
-                            }
-
-                        }
-
-                        if (listOfSampleObject.size() == 1) {
-                            Question sinhalaQuestion = gson.fromJson(Utils.sortCardList(listOfSampleObject).get(0).getQuestion(), Question.class);
-                            byte[] decoded = Base64.decode(sinhalaQuestion.getAudioString(), 0);
-                            playMp3(decoded);
-
-                        } else if (listOfSampleObject.size() == 0) {
-                            ts.speak("කරුණාකර පාරිභෝගික නියෝජිතයා අමතන්න", TextToSpeech.QUEUE_FLUSH, null);
-                            Handler handler = new Handler();
-                            handler.postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    startVoiceRecorder();
-                                }
-                            }, 3000);
-                        } else {
-                            ts.speak("ඔබ අදහස් කලේ", TextToSpeech.QUEUE_FLUSH, null);
-
-                            listView.setVisibility(View.VISIBLE);
-
-                            QuestionListAdapter questionListAdapter = new QuestionListAdapter(FirstPage.this, Utils.sortCardList(listOfSampleObject));
-
-                            listView.setAdapter(questionListAdapter);
-
-                            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                                @Override
-                                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                                    SampleObject sampleObject = (SampleObject) listView.getItemAtPosition(position);
-
-                                    Question tamilQuestion = gson.fromJson(sampleObject.getQuestion(), Question.class);
-                                    getQuestion.setQuestion(tamilQuestion.getQuestion());
-                                    listView.setVisibility(View.GONE);
-
-                                    new CheckTamilQuestionAsync().execute();
-
-                                }
-                            });
-
-                        }
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-
-                    }
-                }
-
-                @Override
-                public void onError(String error) {
-                    Toast.makeText(getApplicationContext(), error, Toast.LENGTH_SHORT).show();
-
-                }
-
-
-            });
-
-
-            return null;
-        }
-    }
-
-    private class CheckEnglishQuestionAsync extends AsyncTask<Void, Void, Void> {
-
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            ApiService policyService = ApiService.getInstance();
-            final Gson gson = new Gson();
-
-            final List<SampleObject> listOfSampleObject = new ArrayList<>();
-
-            policyService.checkEnglishaQuestion(FirstPage.this, getQuestion, new VolleyCallback() {
-                @Override
-                public void onSuccessResponse(String result) {
-                    JSONObject jsonObject;
-                    String status;
-                    try {
-                        jsonObject = new JSONObject(result);
-
-
-                        Object json = new JSONTokener(jsonObject.getString("object")).nextValue();
-
-                        if (json instanceof JSONObject) {
-
-                            String str = jsonObject.getString("object");
-                            SampleObject sampleObject = new SampleObject();
-
-                            sampleObject.setQuestion(str);
-                            sampleObject.setCount(1);
-
-                            listOfSampleObject.add(sampleObject);
-                        } else if (json instanceof JSONArray) {
-
-                            JSONArray jsonArray = jsonObject.getJSONArray("object");
-                            for (int i = 0; i < jsonArray.length(); i++) {
-                                JSONObject jsonObject1 = jsonArray.getJSONObject(i);
-                                SampleObject sampleObject = new SampleObject();
-
-                                sampleObject.setQuestion(jsonObject1.getString("englishQuestion"));
-                                sampleObject.setCount(jsonObject1.getInt("count"));
-
-
-                                listOfSampleObject.add(sampleObject);
-                            }
-
-                        }
-
-                        if (listOfSampleObject.size() == 1) {
-                            Question sinhalaQuestion = gson.fromJson(Utils.sortCardList(listOfSampleObject).get(0).getQuestion(), Question.class);
-                            byte[] decoded = Base64.decode(sinhalaQuestion.getAudioString(), 0);
-                            playMp3(decoded);
-
-                        } else if (listOfSampleObject.size() == 0) {
-                            ts.speak("කරුණාකර පාරිභෝගික නියෝජිතයා අමතන්න", TextToSpeech.QUEUE_FLUSH, null);
-                            Handler handler = new Handler();
-                            handler.postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    startVoiceRecorder();
-                                }
-                            }, 3000);
-                        } else {
-                            ts.speak("ඔබ අදහස් කලේ", TextToSpeech.QUEUE_FLUSH, null);
-                            listView.setVisibility(View.VISIBLE);
-
-                            QuestionListAdapter questionListAdapter = new QuestionListAdapter(FirstPage.this, Utils.sortCardList(listOfSampleObject));
-
-                            listView.setAdapter(questionListAdapter);
-
-                            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                                @Override
-                                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                                    SampleObject sampleObject = (SampleObject) listView.getItemAtPosition(position);
-
-                                    Question tamilQuestion = gson.fromJson(sampleObject.getQuestion(), Question.class);
-                                    getQuestion.setQuestion(tamilQuestion.getQuestion());
-                                    listView.setVisibility(View.GONE);
-
-                                    new CheckEnglishQuestionAsync().execute();
-
-                                }
-                            });
-                        }
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-
-                    }
-                }
-
-                @Override
-                public void onError(String error) {
-                    Toast.makeText(getApplicationContext(), error, Toast.LENGTH_SHORT).show();
-
-                }
-
-
-            });
-
-
-            return null;
-        }
-
-    }
-
 
     private void playMp3(byte[] mp3SoundByteArray) {
         try {
