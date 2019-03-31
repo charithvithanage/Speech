@@ -43,20 +43,24 @@ public class QuestionListAdapter extends ArrayAdapter<SampleObject> {
             holder = new ViewHolder();
 
             holder.tvQuestion =  convertView.findViewById(R.id.tvQuestion);
+            holder.tvCount =  convertView.findViewById(R.id.tvMachinWords);
             convertView.setTag(holder);
             convertView.setTag(R.id.tvQuestion, holder.tvQuestion);
+            convertView.setTag(R.id.tvMachinWords, holder.tvCount);
 
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
 
         holder.tvQuestion.setText(questionString);
+        holder.tvCount.setText("Matching words : ("+String.valueOf(sampleObj.getCount())+")");
 //        holder.tvSampleObjectLocation.setText(courtHouseObj.getCity());
         return convertView;
     }
 
     static class ViewHolder {
         protected TextView tvQuestion;
+        TextView tvCount;
     }
 
     @Override

@@ -12,10 +12,10 @@
         android:layout_width="202dp"
         android:layout_height="81dp"
         android:layout_gravity="right"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toTopOf="@+id/status"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.885"
@@ -28,8 +28,8 @@
         android:id="@+id/status"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toTopOf="@+id/ivAnimation"
         app:layout_constraintEnd_toEndOf="parent"
@@ -57,10 +57,10 @@
         android:layout_width="266dp"
         android:layout_height="142dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toTopOf="@+id/btnLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.372"
@@ -72,10 +72,10 @@
         android:id="@+id/btnLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
         android:layout_weight="1"
         android:gravity="center"
         android:orientation="vertical"
@@ -112,14 +112,60 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/button_bg"
-            android:textColor="@color/primary"
+            android:text="தமிழ்"
 
-            android:text="தமிழ்" />
+            android:textColor="@color/primary" />
     </LinearLayout>
+
+    <WebView
+        android:id="@+id/webView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"></WebView>
+
 
     <ListView
         android:id="@+id/questionList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1" />
+
+    <TextView
+        android:id="@+id/tvAnswer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:padding="@dimen/activity_horizontal_margin" />
+
+
+
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+       >
+
+        <Button
+            android:id="@+id/btnRestart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:text="Restart"
+            android:background="@drawable/button_bg"
+            android:textColor="@color/primary"
+            android:layout_weight="1"
+            android:layout_margin="@dimen/activity_horizontal_margin"/>
+
+        <Button
+            android:id="@+id/btnClose"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="@drawable/button_bg"
+            android:text="Close" android:layout_weight="1"
+            android:textColor="@color/primary"
+            android:layout_margin="@dimen/activity_horizontal_margin"/>
+    </LinearLayout>
 </LinearLayout>

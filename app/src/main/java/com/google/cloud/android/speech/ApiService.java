@@ -22,12 +22,12 @@ public class ApiService {
     private static final String TAG = "GoogleVoiceToText";
     Gson gson = new Gson();
 
-    private static ApiService apiService=new ApiService();
+    private static ApiService apiService = new ApiService();
 
     public ApiService() {
     }
 
-    public static ApiService getInstance(){
+    public static ApiService getInstance() {
         return apiService;
     }
 
@@ -38,8 +38,8 @@ public class ApiService {
 
 
         final String stringUser = gson.toJson(sinhalaQuestion);
-        Log.d(TAG,stringUser);
-        Log.d(TAG,Config.getSinhalaQuestion);
+        Log.d(TAG, stringUser);
+        Log.d(TAG, Config.getSinhalaQuestion);
 
         JSONObject object = null;
 
@@ -49,7 +49,7 @@ public class ApiService {
             e.printStackTrace();
         }
 
-        JsonObjectRequest jsonobj =new JsonObjectRequest(Request.Method.POST, Config.getSinhalaQuestion, object, new Response.Listener<JSONObject>() {
+        JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.POST, Config.getSinhalaQuestion, object, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 callback.onSuccessResponse(response.toString());
@@ -69,11 +69,21 @@ public class ApiService {
 
 
         RequestQueue queue = Volley.newRequestQueue(context);
+        String url = null;
 
+        if (Config.Instance.getLanguageCode().equals("si-LK")) {
+            url = Config.checkSinhalaQuestion;
+        } else if (Config.Instance.getLanguageCode().equals("ta-LK")) {
+            url = Config.checkTamilQuestion;
+
+        } else {
+            url = Config.checkEnglishQuestion;
+
+        }
 
         final String stringUser = gson.toJson(sinhalaQuestion);
-        Log.d(TAG,stringUser);
-        Log.d(TAG,Config.checkSinhalaQuestion);
+        Log.d(TAG, stringUser);
+        Log.d(TAG, Config.checkSinhalaQuestion);
 
         JSONObject object = null;
 
@@ -83,7 +93,7 @@ public class ApiService {
             e.printStackTrace();
         }
 
-        JsonObjectRequest jsonobj =new JsonObjectRequest(Request.Method.POST, Config.checkSinhalaQuestion, object, new Response.Listener<JSONObject>() {
+        JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.POST, url, object, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 callback.onSuccessResponse(response.toString());
@@ -106,8 +116,8 @@ public class ApiService {
 
 
         final String stringUser = gson.toJson(tamilQuestion);
-        Log.d(TAG,stringUser);
-        Log.d(TAG,Config.checkTamilQuestion);
+        Log.d(TAG, stringUser);
+        Log.d(TAG, Config.checkTamilQuestion);
 
         JSONObject object = null;
 
@@ -117,7 +127,7 @@ public class ApiService {
             e.printStackTrace();
         }
 
-        JsonObjectRequest jsonobj =new JsonObjectRequest(Request.Method.POST, Config.checkTamilQuestion, object, new Response.Listener<JSONObject>() {
+        JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.POST, Config.checkTamilQuestion, object, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 callback.onSuccessResponse(response.toString());
@@ -141,8 +151,8 @@ public class ApiService {
 
 
         final String stringUser = gson.toJson(englishQuestion);
-        Log.d(TAG,stringUser);
-        Log.d(TAG,Config.checkEnglishQuestion);
+        Log.d(TAG, stringUser);
+        Log.d(TAG, Config.checkEnglishQuestion);
 
         JSONObject object = null;
 
@@ -152,7 +162,7 @@ public class ApiService {
             e.printStackTrace();
         }
 
-        JsonObjectRequest jsonobj =new JsonObjectRequest(Request.Method.POST, Config.checkEnglishQuestion, object, new Response.Listener<JSONObject>() {
+        JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.POST, Config.checkEnglishQuestion, object, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 callback.onSuccessResponse(response.toString());

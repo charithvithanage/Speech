@@ -30,6 +30,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Speech"
         tools:ignore="GoogleAppIndexingWarning"
+        android:excludeFromRecents="true"
         android:largeHeap="true">
         <activity android:name=".FirstPage">
             <intent-filter>

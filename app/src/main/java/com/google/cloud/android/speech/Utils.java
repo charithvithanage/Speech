@@ -21,7 +21,7 @@ public class Utils {
         Collections.sort(lsit, new Comparator<SampleObject>() {
             public int compare(SampleObject obj1, SampleObject obj2) {
                 // ## Ascending order
-                return Integer.valueOf((int) obj1.getCount()).compareTo((int) obj2.getCount()); // To compare string values
+                return Integer.valueOf((int) obj2.getCount()).compareTo((int) obj1.getCount()); // To compare string values
                 // return Integer.valueOf(obj1.empId).compareTo(obj2.empId); // To compare integer values
 
                 // ## Descending order
