@@ -9,6 +9,7 @@ import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.speech.SpeechRecognizer;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -69,7 +70,7 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
 
     ListView listView;
 
-    TextView tvAnswer;
+    TextView tvAnswer, tvQuestion;
 
     MediaPlayer mediaPlayer = new MediaPlayer();
 
@@ -83,7 +84,6 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
         setContentView(R.layout.activity_first);
 
         Log.d(TAG, "onCreated()");
-
         Config.Instance.setLanguageCode("en-US");
 
         init();
@@ -96,14 +96,12 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
             }
         });
 
-
         btnSinhala.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 selectSinhala();
             }
         });
-
 
         btnTamil.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -119,6 +117,7 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
                 System.exit(0);
             }
         });
+
         btnRestart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -188,6 +187,7 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
         btnClose = findViewById(R.id.btnClose);
         listView = findViewById(R.id.questionList);
         tvAnswer = findViewById(R.id.tvAnswer);
+        tvQuestion = findViewById(R.id.tvQuestion);
         tvWait = findViewById(R.id.tvWait);
         listView.setVisibility(View.GONE);
 //        tvWait.setText("Say something....");
@@ -385,63 +385,69 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
                 REQUEST_RECORD_AUDIO_PERMISSION);
     }
 
-    private final SpeechService.Listener mSpeechServiceListener =
-            new SpeechService.Listener() {
-                @Override
-                public void onSpeechRecognized(final String text, final boolean isFinal) {
+    private final SpeechService.Listener mSpeechServiceListener = new SpeechService.Listener() {
+        @Override
+        public void onSpeechRecognized(final String text, final boolean isFinal) {
 
 
-                    if (isFinal) {
-                        stopVoiceRecorder();
-                    }
+            if (isFinal) {
+                stopVoiceRecorder();
+            }
 
-                    if (!TextUtils.isEmpty(text)) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (isFinal) {
+            if (!TextUtils.isEmpty(text)) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (isFinal) {
 
-                                    Log.d(TAG, text);
 
-                                    if (status.equals("startStatus")) {
-                                        if (text.toLowerCase().contains("hello")) {
-                                            imageView.setVisibility(View.VISIBLE);
-                                            status = "selectLanguageStatus";
-                                            playMp3ByRawFile(R.raw.im_sam);
+                            Log.d(TAG, text);
+
+                            if (status.equals("startStatus")) {
+                                if (text.toLowerCase().contains("hello")) {
+                                    imageView.setVisibility(View.VISIBLE);
+                                    status = "selectLanguageStatus";
+                                    playMp3ByRawFile(R.raw.im_sam);
 //                                            ts.speak("Hello I'm Sam, Please select your language", TextToSpeech.QUEUE_FLUSH, null);
-                                            btnLayout.setVisibility(View.VISIBLE);
-                                            imageView.setVisibility(View.VISIBLE);
-                                        } else {
-                                            playMp3ByRawFile(R.raw.say_hello_sam);
+                                    btnLayout.setVisibility(View.VISIBLE);
+                                    imageView.setVisibility(View.VISIBLE);
+                                } else {
+                                    playMp3ByRawFile(R.raw.say_hello_sam);
 //                                            ts.speak("Say hello sam", TextToSpeech.QUEUE_FLUSH, null);
-                                        }
-
-                                    } else if (status.equals("selectLanguageStatus")) {
-
-                                        if (firstTwo(text.toLowerCase()).equals("en")) {
-                                            selectEnglish();
-                                        } else if (firstTwo(text.toLowerCase()).equals("ta")) {
-                                            selectTamil();
-                                        } else if (firstTwo(text.toLowerCase()).equals("si")) {
-                                            selectSinhala();
-                                        } else {
-                                            playMp3ByRawFile(R.raw.repeat);
-//                                            ts.speak("Say it again", TextToSpeech.QUEUE_FLUSH, null);
-                                        }
-
-
-                                    } else {
-
-                                        getQuestion.setQuestion(text.toLowerCase());
-                                        new CheckSinhalaQuestionAsync().execute();
-
-                                    }
                                 }
+
+                            } else if (status.equals("selectLanguageStatus")) {
+
+                                if (firstTwo(text.toLowerCase()).equals("en")) {
+                                    selectEnglish();
+                                } else if (firstTwo(text.toLowerCase()).equals("ta")) {
+                                    selectTamil();
+                                } else if (firstTwo(text.toLowerCase()).equals("si")) {
+                                    selectSinhala();
+                                } else {
+                                    playMp3ByRawFile(R.raw.repeat);
+//                                            ts.speak("Say it again", TextToSpeech.QUEUE_FLUSH, null);
+                                }
+
+
+                            } else {
+
+                                tvQuestion.setText(text + "?");
+
+                                getQuestion.setQuestion(text.toLowerCase());
+                                new CheckSinhalaQuestionAsync().execute();
+
+                                tvAnswer.setVisibility(View.GONE);
+                                webView.setVisibility(View.GONE);
+
+
                             }
-                        });
+                        }
                     }
-                }
-            };
+                });
+            }
+        }
+    };
 
     public String firstTwo(String str) {
         return str.length() < 2 ? str : str.substring(0, 2);
