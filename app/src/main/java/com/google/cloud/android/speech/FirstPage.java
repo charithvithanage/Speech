@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -26,9 +27,14 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import com.bumptech.glide.Glide;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.scaledrone.lib.Room;
+import com.scaledrone.lib.RoomListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -41,6 +47,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class FirstPage extends AppCompatActivity implements MessageDialogFragment.Listener {
 
@@ -62,7 +69,7 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
 
     LinearLayout btnLayout;
 
-    ImageView imageView;
+    VideoView imageView;
 
     TextView tvWait;
 
@@ -77,6 +84,9 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
     Button btnRestart, btnClose;
 
     WebView webView;
+
+    private MessageAdapter messageAdapter;
+    private ListView messagesView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -126,6 +136,25 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
                 startActivity(intent);
             }
         });
+    }
+
+    private String getRandomName() {
+        String[] adjs = {"autumn", "hidden", "bitter", "misty", "silent", "empty", "dry", "dark", "summer", "icy", "delicate", "quiet", "white", "cool", "spring", "winter", "patient", "twilight", "dawn", "crimson", "wispy", "weathered", "blue", "billowing", "broken", "cold", "damp", "falling", "frosty", "green", "long", "late", "lingering", "bold", "little", "morning", "muddy", "old", "red", "rough", "still", "small", "sparkling", "throbbing", "shy", "wandering", "withered", "wild", "black", "young", "holy", "solitary", "fragrant", "aged", "snowy", "proud", "floral", "restless", "divine", "polished", "ancient", "purple", "lively", "nameless"};
+        String[] nouns = {"waterfall", "river", "breeze", "moon", "rain", "wind", "sea", "morning", "snow", "lake", "sunset", "pine", "shadow", "leaf", "dawn", "glitter", "forest", "hill", "cloud", "meadow", "sun", "glade", "bird", "brook", "butterfly", "bush", "dew", "dust", "field", "fire", "flower", "firefly", "feather", "grass", "haze", "mountain", "night", "pond", "darkness", "snowflake", "silence", "sound", "sky", "shape", "surf", "thunder", "violet", "water", "wildflower", "wave", "water", "resonance", "sun", "wood", "dream", "cherry", "tree", "fog", "frost", "voice", "paper", "frog", "smoke", "star"};
+        return (
+                adjs[(int) Math.floor(Math.random() * adjs.length)] +
+                        "_" +
+                        nouns[(int) Math.floor(Math.random() * nouns.length)]
+        );
+    }
+
+    private String getRandomColor() {
+        Random r = new Random();
+        StringBuffer sb = new StringBuffer("#");
+        while (sb.length() < 7) {
+            sb.append(Integer.toHexString(r.nextInt()));
+        }
+        return sb.toString().substring(0, 7);
     }
 
     private String getUrlFromString(String str) {
@@ -183,6 +212,11 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
 
 
     private void init() {
+
+        messageAdapter = new MessageAdapter(this);
+        messagesView = (ListView) findViewById(R.id.messages_view);
+        messagesView.setAdapter(messageAdapter);
+
         btnRestart = findViewById(R.id.btnRestart);
         btnClose = findViewById(R.id.btnClose);
         listView = findViewById(R.id.questionList);
@@ -197,7 +231,8 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
         imageView = findViewById(R.id.ivAnimation);
 //        hearingImageView = findViewById(R.id.hearingImageView);
 //        hearingImageView.setVisibility(View.GONE);
-        Glide.with(this).load("https://cdn.dribbble.com/users/1162077/screenshots/4649464/skatter-programmer.gif").into(imageView);
+        playMp4ByRawFile(R.raw.hi_video);
+//        Glide.with(this).load("https://cdn.dribbble.com/users/1162077/screenshots/4649464/skatter-programmer.gif").into(imageView);
 //        Glide.with(this).load(R.raw.listning).into(hearingImageView);
         btnEnglish = findViewById(R.id.btnEnglish);
         btnSinhala = findViewById(R.id.btnSinhala);
@@ -322,6 +357,7 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
 
         Config.Instance.setLanguageCode("si-LK");
         playMp3ByRawFile(R.raw.select_language_sinhala);
+        sendMessage("English selected ask questions in english", false);
         btnLayout.setVisibility(View.GONE);
     }
 
@@ -332,6 +368,7 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
 
         Config.Instance.setLanguageCode("en-US");
         playMp3ByRawFile(R.raw.select_language_eng);
+        sendMessage("English selected ask questions in english", false);
         btnLayout.setVisibility(View.GONE);
 
     }
@@ -403,16 +440,24 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
 
                             Log.d(TAG, text);
 
+                            sendMessage(text, true);
+
                             if (status.equals("startStatus")) {
                                 if (text.toLowerCase().contains("hello")) {
                                     imageView.setVisibility(View.VISIBLE);
                                     status = "selectLanguageStatus";
                                     playMp3ByRawFile(R.raw.im_sam);
+                                    playMp4ByRawFile(R.raw.hi_video);
+                                    sendMessage("Hello I'm Sam, Please select your language", false);
+
 //                                            ts.speak("Hello I'm Sam, Please select your language", TextToSpeech.QUEUE_FLUSH, null);
                                     btnLayout.setVisibility(View.VISIBLE);
-                                    imageView.setVisibility(View.VISIBLE);
                                 } else {
                                     playMp3ByRawFile(R.raw.say_hello_sam);
+                                    playMp4ByRawFile(R.raw.hi_video);
+
+                                    sendMessage("Please say hello Sam", false);
+
 //                                            ts.speak("Say hello sam", TextToSpeech.QUEUE_FLUSH, null);
                                 }
 
@@ -426,6 +471,10 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
                                     selectSinhala();
                                 } else {
                                     playMp3ByRawFile(R.raw.repeat);
+                                    playMp4ByRawFile(R.raw.hi_video);
+
+                                    sendMessage("Please repeat", false);
+
 //                                            ts.speak("Say it again", TextToSpeech.QUEUE_FLUSH, null);
                                 }
 
@@ -516,6 +565,7 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
                             final Question sinhalaQuestion = gson.fromJson(Utils.sortCardList(listOfSampleObject).get(0).getQuestion(), Question.class);
                             byte[] decoded = Base64.decode(sinhalaQuestion.getAudioString(), 0);
                             playMp3(decoded);
+                            sendMessage(sinhalaQuestion.getAnswer(), false);
                             tvAnswer.setVisibility(View.VISIBLE);
                             webView.setVisibility(View.GONE);
 
@@ -537,13 +587,21 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
                         } else if (listOfSampleObject.size() == 0) {
                             if (Config.Instance.getLanguageCode().equals("si-LK")) {
                                 playMp3ByRawFile(R.raw.contact_customer_representative_sinhala);
+                                playMp4ByRawFile(R.raw.hi_video);
+
+                                sendMessage("කරුණාකර පාරිභෝගික නියෝජිතයා අමතන්න", false);
 
 
                             } else if (Config.Instance.getLanguageCode().equals("ta-LK")) {
                                 playMp3ByRawFile(R.raw.contact_customer_representative_tamil);
+                                playMp4ByRawFile(R.raw.hi_video);
+
 
                             } else {
                                 playMp3ByRawFile(R.raw.contact_customer_representative_eng);
+                                playMp4ByRawFile(R.raw.hi_video);
+
+                                sendMessage("Please contact a customer representative", false);
 
                             }
 
@@ -553,12 +611,18 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
 
                             if (Config.Instance.getLanguageCode().equals("si-LK")) {
                                 playMp3ByRawFile(R.raw.did_you_mean_sinhala);
+                                playMp4ByRawFile(R.raw.hi_video);
+
 
                             } else if (Config.Instance.getLanguageCode().equals("ta-LK")) {
                                 playMp3ByRawFile(R.raw.did_you_mean_tamil);
+                                playMp4ByRawFile(R.raw.hi_video);
+
 
                             } else {
                                 playMp3ByRawFile(R.raw.did_you_mean_eng);
+                                playMp4ByRawFile(R.raw.hi_video);
+
 
                             }
 
@@ -671,5 +735,23 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
             ex.printStackTrace();
         }
     }
+
+    private void playMp4ByRawFile(int resourceId) {
+        String path = "android.resource://" + getPackageName() + "/" + resourceId;
+        imageView.setVideoURI(Uri.parse(path));
+        imageView.start();
+    }
+
+    private void sendMessage(String messageBody, boolean isCurrentUser) {
+        final Message message = new Message(messageBody, isCurrentUser);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                messageAdapter.add(message);
+                messagesView.setSelection(messagesView.getCount() - 1);
+            }
+        });
+    }
+
 
 }
