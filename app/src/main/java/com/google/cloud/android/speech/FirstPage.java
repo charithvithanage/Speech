@@ -10,7 +10,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.speech.SpeechRecognizer;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -22,19 +21,13 @@ import android.view.View;
 import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
-import com.bumptech.glide.Glide;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.scaledrone.lib.Room;
-import com.scaledrone.lib.RoomListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -213,6 +206,8 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
 
     private void init() {
 
+
+
         messageAdapter = new MessageAdapter(this);
         messagesView = (ListView) findViewById(R.id.messages_view);
         messagesView.setAdapter(messageAdapter);
@@ -231,7 +226,7 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
         imageView = findViewById(R.id.ivAnimation);
 //        hearingImageView = findViewById(R.id.hearingImageView);
 //        hearingImageView.setVisibility(View.GONE);
-        playMp4ByRawFile(R.raw.hi_video);
+        playMp4ByRawFile(R.raw.normal);
 //        Glide.with(this).load("https://cdn.dribbble.com/users/1162077/screenshots/4649464/skatter-programmer.gif").into(imageView);
 //        Glide.with(this).load(R.raw.listning).into(hearingImageView);
         btnEnglish = findViewById(R.id.btnEnglish);
@@ -240,7 +235,6 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
         btnLayout = findViewById(R.id.btnLayout);
 
         btnLayout.setVisibility(View.GONE);
-        imageView.setVisibility(View.GONE);
 
 //        tvWait.setVisibility(View.GONE);
 
@@ -357,6 +351,7 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
 
         Config.Instance.setLanguageCode("si-LK");
         playMp3ByRawFile(R.raw.select_language_sinhala);
+        playMp4ByRawFile(R.raw.talk);
         sendMessage("English selected ask questions in english", false);
         btnLayout.setVisibility(View.GONE);
     }
@@ -368,6 +363,7 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
 
         Config.Instance.setLanguageCode("en-US");
         playMp3ByRawFile(R.raw.select_language_eng);
+        playMp4ByRawFile(R.raw.talk);
         sendMessage("English selected ask questions in english", false);
         btnLayout.setVisibility(View.GONE);
 
@@ -380,6 +376,8 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
 
         Config.Instance.setLanguageCode("ta-LK");
         playMp3ByRawFile(R.raw.select_language_tamil);
+        playMp4ByRawFile(R.raw.talk);
+
         btnLayout.setVisibility(View.GONE);
     }
 
@@ -444,7 +442,6 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
 
                             if (status.equals("startStatus")) {
                                 if (text.toLowerCase().contains("hello")) {
-                                    imageView.setVisibility(View.VISIBLE);
                                     status = "selectLanguageStatus";
                                     playMp3ByRawFile(R.raw.im_sam);
                                     playMp4ByRawFile(R.raw.hi_video);
@@ -454,7 +451,7 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
                                     btnLayout.setVisibility(View.VISIBLE);
                                 } else {
                                     playMp3ByRawFile(R.raw.say_hello_sam);
-                                    playMp4ByRawFile(R.raw.hi_video);
+                                    playMp4ByRawFile(R.raw.talk);
 
                                     sendMessage("Please say hello Sam", false);
 
@@ -471,7 +468,7 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
                                     selectSinhala();
                                 } else {
                                     playMp3ByRawFile(R.raw.repeat);
-                                    playMp4ByRawFile(R.raw.hi_video);
+                                    playMp4ByRawFile(R.raw.talk);
 
                                     sendMessage("Please repeat", false);
 
@@ -565,6 +562,7 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
                             final Question sinhalaQuestion = gson.fromJson(Utils.sortCardList(listOfSampleObject).get(0).getQuestion(), Question.class);
                             byte[] decoded = Base64.decode(sinhalaQuestion.getAudioString(), 0);
                             playMp3(decoded);
+                            playMp4ByRawFile(R.raw.talk);
                             sendMessage(sinhalaQuestion.getAnswer(), false);
                             tvAnswer.setVisibility(View.VISIBLE);
                             webView.setVisibility(View.GONE);
@@ -587,19 +585,19 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
                         } else if (listOfSampleObject.size() == 0) {
                             if (Config.Instance.getLanguageCode().equals("si-LK")) {
                                 playMp3ByRawFile(R.raw.contact_customer_representative_sinhala);
-                                playMp4ByRawFile(R.raw.hi_video);
+                                playMp4ByRawFile(R.raw.talk);
 
                                 sendMessage("කරුණාකර පාරිභෝගික නියෝජිතයා අමතන්න", false);
 
 
                             } else if (Config.Instance.getLanguageCode().equals("ta-LK")) {
                                 playMp3ByRawFile(R.raw.contact_customer_representative_tamil);
-                                playMp4ByRawFile(R.raw.hi_video);
+                                playMp4ByRawFile(R.raw.talk);
 
 
                             } else {
                                 playMp3ByRawFile(R.raw.contact_customer_representative_eng);
-                                playMp4ByRawFile(R.raw.hi_video);
+                                playMp4ByRawFile(R.raw.talk);
 
                                 sendMessage("Please contact a customer representative", false);
 
@@ -611,17 +609,17 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
 
                             if (Config.Instance.getLanguageCode().equals("si-LK")) {
                                 playMp3ByRawFile(R.raw.did_you_mean_sinhala);
-                                playMp4ByRawFile(R.raw.hi_video);
+                                playMp4ByRawFile(R.raw.talk);
 
 
                             } else if (Config.Instance.getLanguageCode().equals("ta-LK")) {
                                 playMp3ByRawFile(R.raw.did_you_mean_tamil);
-                                playMp4ByRawFile(R.raw.hi_video);
+                                playMp4ByRawFile(R.raw.talk);
 
 
                             } else {
                                 playMp3ByRawFile(R.raw.did_you_mean_eng);
-                                playMp4ByRawFile(R.raw.hi_video);
+                                playMp4ByRawFile(R.raw.talk);
 
 
                             }
@@ -704,12 +702,7 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
             mediaPlayer.prepare();
             mediaPlayer.start();
 
-            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mp) {
-                    startVoiceRecorder();
-                }
-            });
+
         } catch (IOException ex) {
             String s = ex.toString();
             ex.printStackTrace();
@@ -724,12 +717,23 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
             mediaPlayer = MediaPlayer.create(getApplicationContext(), resorceId);//Create MediaPlayer object with MP3 file under res/raw folder
             mediaPlayer.start();//
 
+
+
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
+
                     startVoiceRecorder();
+                imageView.stopPlayback();
+//                imageView.r   esume();
+
+                    Log.d(TAG,"Player stopped");
+
+                playMp4ByRawFile(R.raw.normal);
                 }
             });
+
+
         } catch (Exception ex) {
             String s = ex.toString();
             ex.printStackTrace();
