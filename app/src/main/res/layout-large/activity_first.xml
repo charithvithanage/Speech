@@ -38,7 +38,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:visibility="gone"/>
+                android:visibility="gone" />
 
             <ListView
                 android:id="@+id/messages_view"
@@ -149,6 +149,41 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"></WebView>
 
+            <TextView
+                android:id="@+id/tvAnswer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <LinearLayout
+                android:id="@+id/emailCalllayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnCallback"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/button_bg"
+                    android:text="Request Callback"
+                    android:textAllCaps="false"
+                    android:layout_marginRight="4dp"
+                    android:textColor="@color/primary" />
+
+                <Button
+                    android:id="@+id/btnEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/button_bg"
+                    android:text="Email form"
+                    android:layout_marginLeft="4dp"
+                    android:textAllCaps="false"
+                    android:textColor="@color/primary" />
+
+            </LinearLayout>
+
 
             <ListView
                 android:id="@+id/questionList"
@@ -167,25 +202,13 @@
             android:padding="8dp">
 
             <Button
-                android:id="@+id/btnRestart"
-                android:layout_width="wrap_content"
-                android:layout_height="50dp"
-                android:layout_gravity="bottom"
-                android:layout_marginRight="4dp"
-                android:layout_weight="1"
-                android:background="@drawable/button_bg"
-                android:text="Restart"
-                android:textColor="@color/primary" />
-
-            <Button
                 android:id="@+id/btnClose"
                 android:layout_width="wrap_content"
                 android:layout_height="50dp"
                 android:layout_gravity="bottom"
-                android:layout_marginLeft="4dp"
                 android:layout_weight="1"
                 android:background="@drawable/button_bg"
-                android:text="Close"
+                android:text="End"
                 android:textColor="@color/primary" />
         </LinearLayout>
 

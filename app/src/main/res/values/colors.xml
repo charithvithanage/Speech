@@ -21,4 +21,10 @@
 
     <color name="status_hearing">#4CAF50</color>
     <color name="status_not_hearing">#FF0000</color>
+    <color name="platinum">#FFD9E3EE</color>
+    <color name="profileBgColor">#FFFBFDFF</color>
+    <color name="cadet_grey">#8CA5C1</color>
+    <color name="charcoal">#324152</color>
+    <color name="radical_red">#F23E54</color>
+
 </resources>

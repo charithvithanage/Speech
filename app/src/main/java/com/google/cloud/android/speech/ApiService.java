@@ -83,7 +83,7 @@ public class ApiService {
 
         final String stringUser = gson.toJson(sinhalaQuestion);
         Log.d(TAG, stringUser);
-        Log.d(TAG, Config.checkSinhalaQuestion);
+        Log.d(TAG, url);
 
         JSONObject object = null;
 
@@ -102,6 +102,8 @@ public class ApiService {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.d(TAG, error.toString());
+                callback.onError(error.toString());
+
             }
         });
 
@@ -179,4 +181,48 @@ public class ApiService {
     }
 
 
+    public void callback(Context context, JSONObject jsonObject, final VolleyCallback volleyCallback) {
+        RequestQueue queue = Volley.newRequestQueue(context);
+
+        Log.d(TAG, jsonObject.toString());
+        Log.d(TAG, Config.callbackUrl);
+
+        JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.POST, Config.callbackUrl, jsonObject, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                volleyCallback.onSuccessResponse(response.toString());
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG, error.toString());
+                volleyCallback.onError(error.toString());
+            }
+        });
+
+        queue.add(jsonobj);
+    }
+
+    public void sendEmail(Context context, JSONObject jsonObject, final VolleyCallback volleyCallback) {
+        RequestQueue queue = Volley.newRequestQueue(context);
+
+        Log.d(TAG, jsonObject.toString());
+        Log.d(TAG, Config.sendEmailUrl);
+
+        JsonObjectRequest jsonobj = new JsonObjectRequest(Request.Method.POST, Config.sendEmailUrl, jsonObject, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                volleyCallback.onSuccessResponse(response.toString());
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG, error.toString());
+                volleyCallback.onError(error.toString());
+
+            }
+        });
+
+        queue.add(jsonobj);
+    }
 }

@@ -56,7 +56,7 @@
             <!--android:layout_height="wrap_content" />-->
         </LinearLayout>
 
-        <ImageView
+        <VideoView
             android:id="@+id/ivAnimation"
             android:layout_width="266dp"
             android:layout_height="142dp"
@@ -71,6 +71,13 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/status"
             app:layout_constraintVertical_bias="0.266" />
+
+        <ListView
+            android:id="@+id/messages_view"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_below="@+id/ivAnimation"
+            android:divider="#fff" />
 
         <LinearLayout
             android:id="@+id/btnLayout"
@@ -179,7 +186,7 @@
             android:layout_marginLeft="4dp"
             android:layout_weight="1"
             android:background="@drawable/button_bg"
-            android:text="Close"
+            android:text="End"
             android:textColor="@color/primary" />
     </LinearLayout>
 </RelativeLayout>

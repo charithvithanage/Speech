@@ -32,7 +32,7 @@
         tools:ignore="GoogleAppIndexingWarning"
         android:excludeFromRecents="true"
         android:largeHeap="true">
-        <activity android:name=".FirstPage" android:screenOrientation="landscape">
+        <activity android:name=".FirstPage" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

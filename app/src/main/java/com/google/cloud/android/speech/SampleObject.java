@@ -3,6 +3,15 @@ package com.google.cloud.android.speech;
 public class SampleObject {
     String question;
     Integer count;
+    Integer points;
+
+    public Integer getPoints() {
+        return points;
+    }
+
+    public void setPoints(Integer points) {
+        this.points = points;
+    }
 
     public String getQuestion() {
         return question;

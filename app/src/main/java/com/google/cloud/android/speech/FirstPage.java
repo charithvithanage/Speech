@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.media.MediaPlayer;
@@ -15,6 +16,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -29,19 +31,27 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.google.gson.Gson;
+import com.orhanobut.dialogplus.DialogPlus;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import okhttp3.internal.Util;
 
 public class FirstPage extends AppCompatActivity implements MessageDialogFragment.Listener {
 
@@ -74,17 +84,29 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
 
     MediaPlayer mediaPlayer = new MediaPlayer();
 
-    Button btnRestart, btnClose;
+    Button btnClose;
 
     WebView webView;
 
+    TextView tvAnswer;
+
+    LinearLayout emailCalllayout;
+
+    Button btnCall, btnEmail;
+
     private MessageAdapter messageAdapter;
     private ListView messagesView;
+
+    String responseTag = null;
+
+//    boolean isTablet;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_first);
+
+
         imageView = findViewById(R.id.ivAnimation);
         imageView.setBackgroundColor(Color.WHITE);
         imageView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
@@ -124,70 +146,102 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
         btnClose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
-                System.exit(0);
-            }
-        });
-
-        btnRestart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
                 Intent intent = getIntent();
                 finish();
                 startActivity(intent);
             }
         });
+
+
+        btnCall.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                stopVoiceRecorder();
+                callBack();
+            }
+        });
+
+        btnEmail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                stopVoiceRecorder();
+                sendEmail();
+            }
+        });
     }
 
-    private String getRandomName() {
-        String[] adjs = {"autumn", "hidden", "bitter", "misty", "silent", "empty", "dry", "dark", "summer", "icy", "delicate", "quiet", "white", "cool", "spring", "winter", "patient", "twilight", "dawn", "crimson", "wispy", "weathered", "blue", "billowing", "broken", "cold", "damp", "falling", "frosty", "green", "long", "late", "lingering", "bold", "little", "morning", "muddy", "old", "red", "rough", "still", "small", "sparkling", "throbbing", "shy", "wandering", "withered", "wild", "black", "young", "holy", "solitary", "fragrant", "aged", "snowy", "proud", "floral", "restless", "divine", "polished", "ancient", "purple", "lively", "nameless"};
-        String[] nouns = {"waterfall", "river", "breeze", "moon", "rain", "wind", "sea", "morning", "snow", "lake", "sunset", "pine", "shadow", "leaf", "dawn", "glitter", "forest", "hill", "cloud", "meadow", "sun", "glade", "bird", "brook", "butterfly", "bush", "dew", "dust", "field", "fire", "flower", "firefly", "feather", "grass", "haze", "mountain", "night", "pond", "darkness", "snowflake", "silence", "sound", "sky", "shape", "surf", "thunder", "violet", "water", "wildflower", "wave", "water", "resonance", "sun", "wood", "dream", "cherry", "tree", "fog", "frost", "voice", "paper", "frog", "smoke", "star"};
-        return (
-                adjs[(int) Math.floor(Math.random() * adjs.length)] +
-                        "_" +
-                        nouns[(int) Math.floor(Math.random() * nouns.length)]
-        );
+    private void sendEmail() {
+        Utils.displayEmailDialog(FirstPage.this, new ConfirmEmailListener() {
+            @Override
+            public void confirmClick(DialogPlus dialog, String email) {
+
+                dialog.dismiss();
+
+                new EmailAsync(email).execute();
+            }
+
+            @Override
+            public void cancelClick(DialogPlus dialog) {
+                dialog.dismiss();
+                startVoiceRecorder();
+            }
+        });
     }
 
-    private String getRandomColor() {
-        Random r = new Random();
-        StringBuffer sb = new StringBuffer("#");
-        while (sb.length() < 7) {
-            sb.append(Integer.toHexString(r.nextInt()));
-        }
-        return sb.toString().substring(0, 7);
+    private void callBack() {
+        Utils.displayCallbackDialog(FirstPage.this, new ConfirmCallbackDialogListener() {
+            @Override
+            public void confirmClick(DialogPlus dialog, String name, String phone) {
+
+                dialog.dismiss();
+
+                new CallbackAsync(name, phone).execute();
+            }
+
+            @Override
+            public void cancelClick(DialogPlus dialog) {
+                dialog.dismiss();
+                startVoiceRecorder();
+
+            }
+        });
     }
 
-    private String getUrlFromString(String str) {
-
-//        Log.d(TAG,String.valueOf(str.indexOf("https://")));
-//        Log.d(TAG,String.valueOf(str.length()));
-        String strEnd;
-
-        if (str.contains("https://")) {
-            int startPosition = str.indexOf("https://");
-            int endPosition = str.length();
-            strEnd = str.substring(startPosition, endPosition);
-
+    public String stripHtml(String html) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            return Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY).toString();
         } else {
-            strEnd = "No url found";
+            return Html.fromHtml(html).toString();
+        }
+    }
+
+    public static String extractUrls(String text) {
+        List<String> containedUrls = new ArrayList<String>();
+        String urlRegex = "((https?|ftp|gopher|telnet|file):((//)|(\\\\))+[\\w\\d:#@%/;$()~_?\\+-=\\\\\\.&]*)";
+        Pattern pattern = Pattern.compile(urlRegex, Pattern.CASE_INSENSITIVE);
+        Matcher urlMatcher = pattern.matcher(text);
+
+        while (urlMatcher.find()) {
+            containedUrls.add(text.substring(urlMatcher.start(0),
+                    urlMatcher.end(0)));
         }
 
 
-        return strEnd;
+        return containedUrls.get(0);
     }
 
 
-    private Boolean checkUrlExistance(String str) {
+    private String checkUrlExistance(String str) {
 
-        Boolean check = false;
+        String checkAnswerType = null;
+
         if (str.contains("https://")) {
-            check = true;
-
+            checkAnswerType = "url";
+        } else if (str.contains("<h>")) {
+            checkAnswerType = "section";
         }
 
-        return check;
-
+        return checkAnswerType;
     }
 
     @Override
@@ -213,13 +267,23 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
 
 
     private void init() {
-
-
         messageAdapter = new MessageAdapter(this);
         messagesView = (ListView) findViewById(R.id.messages_view);
         messagesView.setAdapter(messageAdapter);
+        if (Utils.isTablet(FirstPage.this)) {
 
-        btnRestart = findViewById(R.id.btnRestart);
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+//            isTablet = true;
+        } else {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+//            isTablet = false;
+        }
+
+
+        emailCalllayout = findViewById(R.id.emailCalllayout);
+        tvAnswer = findViewById(R.id.tvAnswer);
+        btnCall = findViewById(R.id.btnCallback);
+        btnEmail = findViewById(R.id.btnEmail);
         btnClose = findViewById(R.id.btnClose);
         listView = findViewById(R.id.questionList);
         tvWait = findViewById(R.id.tvWait);
@@ -228,7 +292,9 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
 
         webView = findViewById(R.id.webView);
         webView.setVisibility(View.GONE);
-//        hearingImageView = findViewById(R.id.hearingImageView);
+        tvAnswer.setVisibility(View.GONE);
+        emailCalllayout.setVisibility(View.GONE);
+        //        hearingImageView = findViewById(R.id.hearingImageView);
 //        hearingImageView.setVisibility(View.GONE);
         playMp4ByRawFile(R.raw.normal, true);
 
@@ -357,7 +423,9 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
         Config.Instance.setLanguageCode("si-LK");
         playMp3ByRawFile(R.raw.select_language_sinhala);
         playMp4ByRawFile(R.raw.talk, false);
-        sendMessage("English selected ask questions in english", false);
+
+        sendMessage("Sinhala selected ask questions in sinhala", false);
+
         btnLayout.setVisibility(View.GONE);
     }
 
@@ -370,6 +438,8 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
         playMp3ByRawFile(R.raw.select_language_eng);
         playMp4ByRawFile(R.raw.talk, false);
         sendMessage("English selected ask questions in english", false);
+
+
         btnLayout.setVisibility(View.GONE);
 
     }
@@ -382,6 +452,8 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
         Config.Instance.setLanguageCode("ta-LK");
         playMp3ByRawFile(R.raw.select_language_tamil);
         playMp4ByRawFile(R.raw.talk, false);
+
+        sendMessage("Tamil selected ask questions in tamil", false);
 
         btnLayout.setVisibility(View.GONE);
     }
@@ -445,6 +517,7 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
 
                             sendMessage(text, true);
 
+
                             if (status.equals("startStatus")) {
                                 if (text.toLowerCase().contains("hello")) {
                                     status = "selectLanguageStatus";
@@ -452,11 +525,13 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
                                     playMp4ByRawFile(R.raw.hi_video, false);
                                     sendMessage("Hello I'm Sam, Please select your language", false);
 
+
 //                                            ts.speak("Hello I'm Sam, Please select your language", TextToSpeech.QUEUE_FLUSH, null);
                                     btnLayout.setVisibility(View.VISIBLE);
                                 } else {
                                     playMp3ByRawFile(R.raw.say_hello_sam);
                                     playMp4ByRawFile(R.raw.talk, false);
+
 
                                     sendMessage("Please say hello Sam", false);
 
@@ -483,13 +558,22 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
 
                             } else {
 
-                                getQuestion.setQuestion(text.toLowerCase());
+
+                                if (text.toLowerCase().contains("උත්සව")) {
+                                    getQuestion.setQuestion(text.toLowerCase().replaceAll("උත්සව", "හිට් සේවර්"));
+                                } else {
+                                    getQuestion.setQuestion(text.toLowerCase());
+
+                                }
                                 new CheckSinhalaQuestionAsync().execute();
 
                                 webView.setVisibility(View.GONE);
+                                tvAnswer.setVisibility(View.GONE);
 
 
                             }
+
+
                         }
                     }
                 });
@@ -531,11 +615,11 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
                         if (json instanceof JSONObject) {
 
                             String str = jsonObject.getString("object");
+                            Log.d(TAG, str);
                             SampleObject sampleObject = new SampleObject();
 
                             sampleObject.setQuestion(str);
                             sampleObject.setCount(1);
-
                             listOfSampleObject.add(sampleObject);
                         } else if (json instanceof JSONArray) {
 
@@ -553,7 +637,7 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
                                 }
 
                                 sampleObject.setCount(jsonObject1.getInt("count"));
-
+                                sampleObject.setPoints(jsonObject1.getInt("points"));
 
                                 listOfSampleObject.add(sampleObject);
                             }
@@ -561,37 +645,72 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
                         }
 
                         if (listOfSampleObject.size() == 1) {
-                            final Question sinhalaQuestion = gson.fromJson(Utils.sortCardList(listOfSampleObject).get(0).getQuestion(), Question.class);
+                            final Question sinhalaQuestion = gson.fromJson(Utils.sortCardList(listOfSampleObject, gson, responseTag).getQuestion(), Question.class);
+
                             byte[] decoded = Base64.decode(sinhalaQuestion.getAudioString(), 0);
                             playMp3(decoded);
                             playMp4ByRawFile(R.raw.talk, false);
 
+                            responseTag = sinhalaQuestion.getTag();
+
+                            Log.d(TAG,responseTag);
+
+
+
                             webView.setVisibility(View.GONE);
+                            tvAnswer.setVisibility(View.GONE);
 
-                            if (checkUrlExistance(sinhalaQuestion.getAnswer())) {
-                                sendMessage(getUrlFromString(sinhalaQuestion.getAnswer()), false);
 
-                                messagesView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                                    @Override
-                                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                            if (sinhalaQuestion.getShow()) {
+                                emailCalllayout.setVisibility(View.VISIBLE);
+                            } else {
+                                emailCalllayout.setVisibility(View.GONE);
+                            }
 
-                                        if (position == messageAdapter.getCount() - 1) {
-                                            webView.setVisibility(View.VISIBLE);
-                                            webView.loadUrl(getUrlFromString(sinhalaQuestion.getAnswer()));
-                                        }
+                            if (checkUrlExistance(sinhalaQuestion.getAnswer()).equals("url")) {
+                                tvAnswer.setVisibility(View.GONE);
+                                webView.setVisibility(View.VISIBLE);
+                                webView.loadUrl(extractUrls(sinhalaQuestion.getAnswer()));
 
-                                    }
-                                });
+                                Log.d(TAG, extractUrls(sinhalaQuestion.getAnswer()));
+                                sendMessage(extractUrls(sinhalaQuestion.getAnswer()), false);
+
+//                                messagesView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//                                    @Override
+//                                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//
+//                                        if (position == messageAdapter.getCount() - 1) {
+//                                            webView.setVisibility(View.VISIBLE);
+//                                            webView.loadUrl(extractUrls(sinhalaQuestion.getAnswer()).get(0));
+//                                        }
+//
+//                                    }
+//                                });
+
+
+                            } else if (checkUrlExistance(sinhalaQuestion.getAnswer()).equals("section")) {
+                                tvAnswer.setVisibility(View.VISIBLE);
+                                webView.setVisibility(View.GONE);
+
+                                tvAnswer.setText(getSectionStringFromAnswer(sinhalaQuestion.getAnswer()));
+
 
                             } else {
+
                                 sendMessage(sinhalaQuestion.getAnswer(), false);
 
 
                             }
+
+
                         } else if (listOfSampleObject.size() == 0) {
+
+                            emailCalllayout.setVisibility(View.GONE);
+
                             if (Config.Instance.getLanguageCode().equals("si-LK")) {
                                 playMp3ByRawFile(R.raw.contact_customer_representative_sinhala);
                                 playMp4ByRawFile(R.raw.talk, false);
+
 
                                 sendMessage("කරුණාකර පාරිභෝගික නියෝජිතයා අමතන්න", false);
 
@@ -605,54 +724,76 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
                                 playMp3ByRawFile(R.raw.contact_customer_representative_eng);
                                 playMp4ByRawFile(R.raw.talk, false);
 
+
                                 sendMessage("Please contact a customer representative", false);
 
                             }
 
-//                            ts.speak("කරුණාකර පාරිභෝගික නියෝජිතයා අමතන්න", TextToSpeech.QUEUE_FLUSH, null);
-
                         } else {
 
-                            if (Config.Instance.getLanguageCode().equals("si-LK")) {
-                                playMp3ByRawFile(R.raw.did_you_mean_sinhala);
-                                playMp4ByRawFile(R.raw.talk, false);
+
+                            listView.setVisibility(View.GONE);
+                            webView.setVisibility(View.GONE);
+
+//                            QuestionListAdapter questionListAdapter = new QuestionListAdapter(FirstPage.this, Utils.sortCardList(listOfSampleObject));
+//
+//                            listView.setAdapter(questionListAdapter);
+//
+//                            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//                                @Override
+//                                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                                    SampleObject sampleObject = (SampleObject) listView.getItemAtPosition(position);
+//
+//                                    Question sinhalaQuestion = gson.fromJson(sampleObject.getQuestion(), Question.class);
+//                                    getQuestion.setQuestion(sinhalaQuestion.getQuestion());
+//                                    listView.setVisibility(View.GONE);
+//
+//                                    new CheckSinhalaQuestionAsync().execute();
+//
+//                                }
+//                            });
 
 
-                            } else if (Config.Instance.getLanguageCode().equals("ta-LK")) {
-                                playMp3ByRawFile(R.raw.did_you_mean_tamil);
-                                playMp4ByRawFile(R.raw.talk, false);
+                            final Question sinhalaQuestion = gson.fromJson(Utils.sortCardList(listOfSampleObject, gson, responseTag).getQuestion(), Question.class);
+
+                            byte[] decoded = Base64.decode(sinhalaQuestion.getAudioString(), 0);
+                            playMp3(decoded);
+                            playMp4ByRawFile(R.raw.talk, false);
+
+                            responseTag = sinhalaQuestion.getTag();
+
+                            Log.d(TAG,responseTag);
+
+                            webView.setVisibility(View.GONE);
 
 
+                            if (sinhalaQuestion.getShow()) {
+                                emailCalllayout.setVisibility(View.VISIBLE);
                             } else {
-                                playMp3ByRawFile(R.raw.did_you_mean_eng);
-                                playMp4ByRawFile(R.raw.talk, false);
-
-
+                                emailCalllayout.setVisibility(View.GONE);
                             }
 
 
-//                            ts.speak("ඔබ අදහස් කලේ", TextToSpeech.QUEUE_FLUSH, null);
+                            if (sinhalaQuestion.getAnswer() != null) {
+                                if (checkUrlExistance(sinhalaQuestion.getAnswer()).equals("url")) {
 
-                            listView.setVisibility(View.VISIBLE);
-                            webView.setVisibility(View.GONE);
+                                    webView.setVisibility(View.VISIBLE);
+                                    webView.loadUrl(extractUrls(sinhalaQuestion.getAnswer()));
+                                    Log.d(TAG, extractUrls(sinhalaQuestion.getAnswer()));
 
-                            QuestionListAdapter questionListAdapter = new QuestionListAdapter(FirstPage.this, Utils.sortCardList(listOfSampleObject));
+                                    sendMessage(extractUrls(sinhalaQuestion.getAnswer()), false);
 
-                            listView.setAdapter(questionListAdapter);
+                                } else if (checkUrlExistance(sinhalaQuestion.getAnswer()).equals("section")) {
 
-                            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                                @Override
-                                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                                    SampleObject sampleObject = (SampleObject) listView.getItemAtPosition(position);
+                                    tvAnswer.setVisibility(View.VISIBLE);
+                                    webView.setVisibility(View.GONE);
+                                    tvAnswer.setText(getSectionStringFromAnswer(sinhalaQuestion.getAnswer()));
 
-                                    Question sinhalaQuestion = gson.fromJson(sampleObject.getQuestion(), Question.class);
-                                    getQuestion.setQuestion(sinhalaQuestion.getQuestion());
-                                    listView.setVisibility(View.GONE);
-
-                                    new CheckSinhalaQuestionAsync().execute();
-
+                                } else {
+                                    sendMessage(sinhalaQuestion.getAnswer(), false);
                                 }
-                            });
+                            }
+
                         }
 
                     } catch (JSONException e) {
@@ -681,6 +822,123 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
         }
+    }
+
+    private class CallbackAsync extends AsyncTask<Void, Void, Void> {
+        String name;
+        String phone;
+
+        public CallbackAsync(String name, String phone) {
+            this.name = name;
+            this.phone = phone;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            stopVoiceRecorder();
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            ApiService policyService = ApiService.getInstance();
+
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put("name", name);
+                jsonObject.put("telNo", phone);
+                jsonObject.put("tag", responseTag);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            policyService.callback(FirstPage.this, jsonObject, new VolleyCallback() {
+                @Override
+                public void onSuccessResponse(String result) {
+                    startVoiceRecorder();
+
+                }
+
+                @Override
+                public void onError(String error) {
+                    Toast.makeText(getApplicationContext(), error, Toast.LENGTH_SHORT).show();
+
+                    startVoiceRecorder();
+
+
+                }
+
+
+            });
+
+
+            return null;
+        }
+
+    }
+
+    private class EmailAsync extends AsyncTask<Void, Void, Void> {
+        String email;
+
+        public EmailAsync(String email) {
+            this.email = email;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            stopVoiceRecorder();
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            ApiService policyService = ApiService.getInstance();
+
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put("tag", responseTag);
+                jsonObject.put("email", email);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            policyService.sendEmail(FirstPage.this, jsonObject, new VolleyCallback() {
+                @Override
+                public void onSuccessResponse(String result) {
+                    startVoiceRecorder();
+
+                }
+
+                @Override
+                public void onError(String error) {
+                    Toast.makeText(getApplicationContext(), error, Toast.LENGTH_SHORT).show();
+
+                    startVoiceRecorder();
+
+
+                }
+
+
+            });
+
+
+            return null;
+        }
+
+    }
+
+
+    private String getSectionStringFromAnswer(String answer) {
+
+        String[] lines = answer.split("\\.");
+
+        StringBuilder builder = new StringBuilder();
+        for (String details : lines) {
+            builder.append(details + "\n");
+        }
+
+        return builder.toString();
+
     }
 
     private void playMp3(byte[] mp3SoundByteArray) {
@@ -768,6 +1026,11 @@ public class FirstPage extends AppCompatActivity implements MessageDialogFragmen
     }
 
     private void sendMessage(String messageBody, boolean isCurrentUser) {
+
+        if (messageBody.contains("උත්සව")) {
+            messageBody = messageBody.replaceAll("උත්සව", "හිට් සේවර්");
+        }
+
         final Message message = new Message(messageBody, isCurrentUser);
         runOnUiThread(new Runnable() {
             @Override
